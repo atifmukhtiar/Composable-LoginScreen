@@ -6,24 +6,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bbllc.composableloginscreen.ui.theme.ComposableLoginScreenTheme
 import com.bbllc.composableloginscreen.viewmodels.LoginViewModel
 
 class MainActivity : ComponentActivity() {
-
-    val loginViewModel: LoginViewModel by viewModels()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LoginScreen("Android")
+                    LoginScreen()
                 }
             }
         }
@@ -42,20 +42,31 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen(name: String, modifier: Modifier = Modifier) {
+fun LoginScreen() {
 
-    var userName by rememberSaveable { mutableStateOf("") }
+    /*Using Viewmodel and MutableFlow*/
+    val loginViewModel: LoginViewModel = viewModel()
+    val userName by loginViewModel.userNameState.collectAsState()
+
+
+    /*Using State Variable to save the state*/
+    var password by rememberSaveable { mutableStateOf("") }
 
     Column {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
-
         OutlinedTextField(value = userName,
-            onValueChange = { userName = it },
+            onValueChange = { loginViewModel.updateUserName(it)},
             label = { Text(text = "User Name") }
         )
+
+        OutlinedTextField(value = password,
+            onValueChange = { password = it },
+            label = { Text(text = "Password") }
+        )
+
+
+        Button(onClick = { /*TODO*/ }) {
+            Text(text = "Login")
+        }
     }
 
 }
@@ -63,7 +74,5 @@ fun LoginScreen(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    ComposableLoginScreenTheme {
-        LoginScreen("Android")
-    }
+    ComposableLoginScreenTheme {}
 }
